@@ -1,10 +1,11 @@
 package com.project.muttley.model;
 
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -12,17 +13,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name="EVENT")
+@Table(name="EVENT_CATEGORY")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Event {
-
+public class EventCategory {
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    Long id;
 
-   @OneToMany
-   @JoinColumn(name = "category_id")
-   private EventCategory category;
+   String name;
+
+   @OneToMany(mappedBy = "category")
+   private List<Event> events;
 }

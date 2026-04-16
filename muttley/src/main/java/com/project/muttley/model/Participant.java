@@ -1,6 +1,5 @@
 package com.project.muttley.model;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,9 +13,13 @@ public class Participant {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @Column
     String name;
 
-    @Column
     String email;
+
+    String ra;
+
+    String linkedin;
+
+    String github;
 }
