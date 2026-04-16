@@ -4,6 +4,6 @@ POST {{url}}auth
 Content-Type: application/json
 
 {
-    "email": "asdasd",
-    "password": "asdasd"
+    "email": "joaopsigue7@gmail.com",
+    "password": "123123"
 }
