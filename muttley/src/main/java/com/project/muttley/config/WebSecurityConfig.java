@@ -24,7 +24,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((request) -> request
                         .requestMatchers(HttpMethod.POST, "/user/**").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 ).addFilterBefore(customBasicAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

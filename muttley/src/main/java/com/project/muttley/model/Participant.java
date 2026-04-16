@@ -10,8 +10,8 @@ import lombok.Data;
 @Data
 public class Participant {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
 
     String name;
 
