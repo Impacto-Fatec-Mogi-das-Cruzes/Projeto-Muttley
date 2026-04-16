@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Admin</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-box animate-fade-up">
+      <div class="auth-header">
+        <h1 class="auth-title">Dashboard do Administrador</h1>
+        <p class="auth-subtitle" th:text="${#authentication != null ? #authentication.name : ''}">admin</p>
+      </div>
+      <div class="auth-card">
+        <p id="messageBox" class="text-sm mb-3"></p>
+
+        <h3>Eventos</h3>
+        <button class="btn btn-primary" type="button" onclick="listEvents()">Listar eventos</button>
+
+        <h3>Participantes</h3>
+        <button class="btn btn-primary" type="button" onclick="listParticipants()">Listar participantes</button>
+
+        <h3>Participações</h3>
+        <button class="btn btn-primary" type="button" onclick="listParticipations()">Listar participações</button>
+
+        <h3>Medalhas</h3>
+        <button class="btn btn-primary" type="button" onclick="listMedals()">Listar medalhas</button>
+
+        <h3>Criar Evento</h3>
+        <form onsubmit="createEvent(event)" class="space-y">
+          <input name="name" class="form-input" placeholder="Nome" required />
+          <input name="location" class="form-input" placeholder="Local" required />
+          <input name="date" type="date" class="form-input" required />
+          <input name="startTime" type="time" class="form-input" required />
+          <select name="status" class="form-input">
+            <option>DRAFT</option><option>SCHEDULED</option><option>IN_PROGRESS</option><option>FINISHED</option><option>CANCELLED</option>
+          </select>
+          <input name="createdByUserId" type="number" class="form-input" placeholder="ID do usuário criador" required />
+          <button class="btn btn-primary" type="submit">Criar evento</button>
+        </form>
+
+        <pre id="output" style="white-space:pre-wrap; margin-top:12px;"></pre>
+
+        <form th:action="@{/logout}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button class="btn btn-primary" type="submit">Sair</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    async function apiCall(url, method = "GET", body = null) {
+      const options = { method, headers: { "Content-Type": "application/json" } };
+      if (body) options.body = JSON.stringify(body);
+      const response = await fetch(url, options);
+      if (response.status === 401 || response.status === 403) {
+        window.location.href = "/login";
+        return null;
+      }
+      const text = await response.text();
+      let data = text;
+      try { data = JSON.parse(text); } catch (_) {}
+      if (!response.ok) throw new Error(typeof data === "string" ? data : JSON.stringify(data));
+      return data;
+    }
+
+    function show(data, ok = true) {
+      document.getElementById("messageBox").textContent = ok ? "Operação concluída com sucesso." : "Erro na operação.";
+      document.getElementById("output").textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+    }
+
+    async function listEvents() { try { show(await apiCall("/api/admin/events")); } catch (e) { show(e.message, false); } }
+    async function listParticipants() { try { show(await apiCall("/api/admin/participants")); } catch (e) { show(e.message, false); } }
+    async function listParticipations() { try { show(await apiCall("/api/admin/event-participations")); } catch (e) { show(e.message, false); } }
+    async function listMedals() { try { show(await apiCall("/api/admin/medals")); } catch (e) { show(e.message, false); } }
+
+    async function createEvent(ev) {
+      ev.preventDefault();
+      const form = ev.target;
+      const body = {
+        name: form.name.value,
+        description: "",
+        date: form.date.value,
+        startTime: form.startTime.value + ":00",
+        endTime: null,
+        location: form.location.value,
+        resourcesNeeded: "",
+        status: form.status.value,
+        createdByUserId: Number(form.createdByUserId.value)
+      };
+      try {
+        show(await apiCall("/api/admin/events", "POST", body));
+        form.reset();
+      } catch (e) {
+        show(e.message, false);
+      }
+    }
+  </script>
+</body>
+</html>

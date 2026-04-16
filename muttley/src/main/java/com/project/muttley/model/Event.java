@@ -1,6 +1,6 @@
 package com.project.muttley.model;
 
-import com.project.muttley.model.enums.RoleInEvent;
+import com.project.muttley.model.enums.EventStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -8,17 +8,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "medals")
+@Table(name = "events")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Medal {
+public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,30 +33,29 @@ public class Medal {
     @Column(length = 1000)
     private String description;
 
+    @NotBlank
     @Column(nullable = false)
-    private String category;
+    private String location;
+
+    private String resourcesNeeded;
 
     @Column(nullable = false)
-    private Integer score;
+    private LocalDate date;
+
+    @Column(nullable = false)
+    private LocalTime startTime;
+
+    private LocalTime endTime;
+
+    private String qrCodeUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RoleInEvent targetRole;
-
-    @Column(nullable = false)
-    private Boolean active = true;
+    private EventStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = false)
-    private Event event;
-
-    @ManyToMany
-    @JoinTable(
-            name = "medal_competencies",
-            joinColumns = @JoinColumn(name = "medal_id"),
-            inverseJoinColumns = @JoinColumn(name = "competency_id")
-    )
-    private List<Competency> competencies = new ArrayList<>();
+    @JoinColumn(name = "created_by_user_id", nullable = false)
+    private User createdBy;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -62,13 +63,19 @@ public class Medal {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Medal> medals = new ArrayList<>();
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventParticipation> participations = new ArrayList<>();
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
-        if (this.active == null) {
-            this.active = true;
+        if (this.status == null) {
+            this.status = EventStatus.DRAFT;
         }
     }
 

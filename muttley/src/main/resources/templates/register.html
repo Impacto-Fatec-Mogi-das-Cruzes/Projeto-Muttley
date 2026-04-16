@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Criar conta — Sistema Muttley</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-box animate-fade-up">
+      <div class="auth-header">
+        <h1 class="auth-title">Criar conta</h1>
+        <p class="auth-subtitle">Acesso ao Sistema Muttley</p>
+      </div>
+      <div class="auth-card">
+        <form th:action="@{/register}" method="post" class="space-y">
+          <div th:if="${registerError}" class="alert-error" th:text="${registerError}"></div>
+
+          <div class="form-group">
+            <label class="form-label" for="username">Nome de usuário</label>
+            <input id="username" name="username" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="name">Nome completo</label>
+            <input id="name" name="name" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">E-mail</label>
+            <input id="email" name="email" type="email" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Senha</label>
+            <input id="password" name="password" type="password" class="form-input" minlength="6" required />
+          </div>
+
+          <button class="btn btn-primary w-full" type="submit" style="justify-content:center">Criar conta</button>
+          <p class="auth-link">
+            Já possui conta?
+            <a th:href="@{/login}">Entrar</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

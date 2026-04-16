@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — Sistema Muttley</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-box animate-fade-up">
+      <div class="auth-header">
+        <img class="auth-logo" th:src="@{/img/fatec-logo.png}" alt="FATEC Zona Leste" onerror="this.style.display='none'" />
+        <h1 class="auth-title">Sistema Muttley</h1>
+        <p class="auth-subtitle">FATEC Zona Leste</p>
+      </div>
+      <div class="auth-card">
+        <form th:action="@{/userLogin}" method="post" class="space-y">
+          <div th:if="${param.error}" id="login-error" class="alert-error">Credenciais inválidas.</div>
+          <div th:if="${param.logout}" class="alert-success">Sessão encerrada com sucesso.</div>
+          <div th:if="${registerSuccess}" class="alert-success" th:text="${registerSuccess}"></div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">E-mail</label>
+            <input id="email" name="email" type="email" class="form-input" autocomplete="username"
+                   placeholder="seu.email@fatec.sp.gov.br" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="senha">Senha</label>
+            <input id="senha" name="senha" type="password" class="form-input" autocomplete="current-password"
+                   placeholder="••••••••" required />
+          </div>
+          <button class="btn btn-primary w-full" type="submit" style="justify-content:center">Entrar</button>
+          <p class="auth-link">
+            Não tem conta?
+            <a th:href="@{/register}">Criar conta</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
