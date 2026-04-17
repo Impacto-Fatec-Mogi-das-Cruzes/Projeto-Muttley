@@ -30,10 +30,10 @@ public class Medal {
     String competence;
 
     @Column
-    Integer totalHours;
+    String local;
 
     @Column
-    String local;
+    Integer totalHours;
 
     @ManyToMany(mappedBy = "medals")
     private List<Competency> competencies;
