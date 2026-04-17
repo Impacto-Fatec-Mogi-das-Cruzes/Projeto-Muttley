@@ -22,14 +22,14 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**").permitAll()
-                        .anyRequest().authenticated())
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/home", true)
-                        .permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
+                // .authorizeHttpRequests(auth -> auth
+                //         .requestMatchers("/login", "/css/**").permitAll()
+                //         .anyRequest().authenticated())
+                // .formLogin(form -> form
+                //         .loginPage("/login")
+                //         .defaultSuccessUrl("/home", true)
+                //         .permitAll())
+                // .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
                 .build();
     }
 

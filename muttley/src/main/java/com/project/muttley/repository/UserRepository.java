@@ -1,5 +1,6 @@
 package com.project.muttley.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
    @Query("SELECT u FROM User u JOIN FETCH u.roles where u.email = :email")
    User findByEmailFetchRoles(@Param("email") String email);
+
+    List<User> findByEmailContainingIgnoreCase(String email);
+
+    List<User> findByRoles_Name(String role);
+
+    List<User> findByEmailContainingIgnoreCaseAndRoles_Name(String email, String role);
 }
