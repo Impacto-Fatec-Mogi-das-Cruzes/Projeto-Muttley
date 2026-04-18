@@ -1,17 +1,23 @@
 package com.project.muttley.dto;
 
-import java.util.List;
-
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserDTO {
-    String name;
-    String email;
-    String password;
-    List<String> roles;
+
+    private String name;
+
+    @Email(message = "Email inválido")
+    private String email;
+
+    private String password;
+
+    private List<String> roles;
 }
