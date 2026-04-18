@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.project.muttley.dto.CreateUserDTO;
+import com.project.muttley.dto.UpdateUserDTO;
 import com.project.muttley.dto.UserResponseDTO;
 import com.project.muttley.model.User;
 import com.project.muttley.service.UserService;
@@ -59,7 +60,7 @@ public class UserController {
     @PutMapping("/{id}")
     public UserResponseDTO updateUser(
             @PathVariable Long id,
-            @RequestBody CreateUserDTO data
+            @RequestBody UpdateUserDTO data
     ) {
         User user = userService.updateUser(id, data);
 

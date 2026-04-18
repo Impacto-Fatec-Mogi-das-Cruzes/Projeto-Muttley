@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class CreateUserDTO {
    String name;
-   String email;String password;
+   String email;
+   String password;
    List<String> roles;
 }

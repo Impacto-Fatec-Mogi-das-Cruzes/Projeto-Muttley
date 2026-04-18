@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.project.muttley.dto.CreateUserDTO;
+import com.project.muttley.dto.UpdateUserDTO;
 import com.project.muttley.model.Role;
 import com.project.muttley.model.User;
 import com.project.muttley.repository.RoleRepository;
@@ -68,18 +69,27 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
-    public User updateUser(Long id, CreateUserDTO data) {
+    public User updateUser(Long id, UpdateUserDTO data) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        user.setName(data.getName());
-        user.setEmail(data.getEmail());
+        // Nome
+        if (data.getName() != null && !data.getName().isBlank()) {
+            user.setName(data.getName());
+        }
 
-        if (data.getPassword() != null) {
+        // Email
+        if (data.getEmail() != null && !data.getEmail().isBlank()) {
+            user.setEmail(data.getEmail());
+        }
+
+        // Senha
+        if (data.getPassword() != null && !data.getPassword().isBlank()) {
             user.setPassword(passwordEncoder.encode(data.getPassword()));
         }
 
-        if (data.getRoles() != null) {
+        // Roles
+        if (data.getRoles() != null && !data.getRoles().isEmpty()) {
             List<Role> roles = data.getRoles().stream()
                     .map(roleName -> roleRepository.findByName(roleName)
                             .orElseThrow(() -> new RuntimeException("Role não encontrada: " + roleName)))
