@@ -4,10 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
-public class CreateUserDTO {
+public class CreateParticipantDTO {
 
     @NotBlank(message = "Nome é obrigatório")
     private String name;
@@ -16,8 +14,10 @@ public class CreateUserDTO {
     @NotBlank(message = "Email é obrigatório")
     private String email;
 
-    @NotBlank(message = "Senha é obrigatória")
-    private String password;
+    @NotBlank(message = "CPF é obrigatório")
+    private String cpf;
 
-    private List<String> roles;
+    private String linkedin;
+
+    private String github;
 }

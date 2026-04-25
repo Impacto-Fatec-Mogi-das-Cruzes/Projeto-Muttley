@@ -17,7 +17,7 @@ public class Participant {
 
     String email;
 
-    String ra;
+    String cpf;
 
     String linkedin;
 
