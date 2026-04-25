@@ -19,11 +19,11 @@ public class ParticipantService {
 
     public ParticipantResponseDTO create(CreateParticipantDTO dto) {
         if (participantRepository.existsByCpf(dto.getCpf())) {
-            throw new RuntimeException("CPF já cadastrado: " + dto.getCpf());
+            // throw new RuntimeException("CPF já cadastrado: " + dto.getCpf());
         }
-        if (participantRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Email já cadastrado: " + dto.getEmail());
-        }
+        // if (participantRepository.existsByEmail(dto.getEmail())) {
+        //     throw new RuntimeException("Email já cadastrado: " + dto.getEmail());
+        // }
 
         Participant participant = new Participant();
         participant.setName(dto.getName());
@@ -36,7 +36,7 @@ public class ParticipantService {
     }
 
 
-    public Page<ParticipantResponseDTO> getAll(String cpf, String name, Pageable pageable) {
+    public Page<ParticipantResponseDTO> get(String cpf, String name, Pageable pageable) {
         Page<Participant> page;
 
         if (cpf != null && !cpf.isBlank()) {
