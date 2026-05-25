@@ -1,4 +1,4 @@
-package com.project.muttley.domain.eventmodality;
+package com.project.muttley.domain.event.eventmodality;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,15 +23,15 @@ import lombok.Setter;
 @Setter
 public class EventModality {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
+  @Id
+  @GeneratedValue
+  private UUID id;
 
-    private String name;
+  private String name;
 
-    @CreatedDate
-    private LocalDateTime createdAt;
+  @CreatedDate
+  private LocalDateTime createdAt;
 
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+  @LastModifiedDate
+  private LocalDateTime updatedAt;
 }

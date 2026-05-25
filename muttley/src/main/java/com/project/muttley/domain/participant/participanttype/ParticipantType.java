@@ -1,4 +1,4 @@
-package com.project.muttley.domain.eventstatus;
+package com.project.muttley.domain.participant.participanttype;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,22 +16,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "event_status")
-@NoArgsConstructor
+@Table(name = "participant_type")
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-public class EventStatus {
+public class ParticipantType {
 
-    @Id
-    @GeneratedValue
-    private UUID id;
+  @Id
+  @GeneratedValue
+  private UUID id;
 
-    private String name;
+  private String name;
 
-    @CreatedDate
-    private LocalDateTime createdAt;
+  @CreatedDate
+  private LocalDateTime createdAt;
 
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
+  @LastModifiedDate
+  private LocalDateTime updatedAt;
 }
