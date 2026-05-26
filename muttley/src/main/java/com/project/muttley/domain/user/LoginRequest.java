@@ -1,4 +1,4 @@
-package com.project.muttley.dtos;
+package com.project.muttley.domain.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

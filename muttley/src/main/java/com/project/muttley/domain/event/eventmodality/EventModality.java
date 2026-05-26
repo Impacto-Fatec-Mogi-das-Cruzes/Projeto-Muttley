@@ -1,10 +1,8 @@
 package com.project.muttley.domain.event.eventmodality;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import com.project.muttley.domain.base.AuditableEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,17 +19,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class EventModality {
+public class EventModality extends AuditableEntity {
 
   @Id
   @GeneratedValue
   private UUID id;
 
   private String name;
-
-  @CreatedDate
-  private LocalDateTime createdAt;
-
-  @LastModifiedDate
-  private LocalDateTime updatedAt;
 }

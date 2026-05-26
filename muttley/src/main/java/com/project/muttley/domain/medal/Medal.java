@@ -2,6 +2,7 @@ package com.project.muttley.domain.medal;
 
 import java.util.UUID;
 
+import com.project.muttley.domain.base.AuditableEntity;
 import com.project.muttley.domain.participant.Participant;
 
 import jakarta.persistence.Entity;
@@ -21,7 +22,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Medal {
+public class Medal extends AuditableEntity {
 
   @Id
   @GeneratedValue
@@ -32,5 +33,4 @@ public class Medal {
   @ManyToOne
   @JoinColumn(name = "participant_id")
   private Participant participant;
-
 }

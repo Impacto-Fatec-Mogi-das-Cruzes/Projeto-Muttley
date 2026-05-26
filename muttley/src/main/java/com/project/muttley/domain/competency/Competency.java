@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.project.muttley.domain.base.AuditableEntity;
 import com.project.muttley.domain.participant.Participant;
 
 import jakarta.persistence.Entity;
@@ -22,7 +23,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Competency {
+public class Competency extends AuditableEntity {
 
   @Id
   @GeneratedValue

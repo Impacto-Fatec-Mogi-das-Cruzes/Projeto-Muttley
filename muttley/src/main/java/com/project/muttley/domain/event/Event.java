@@ -1,15 +1,10 @@
 package com.project.muttley.domain.event;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-
+import com.project.muttley.domain.base.AuditableEntity;
 import com.project.muttley.domain.event.eventmodality.EventModality;
 import com.project.muttley.domain.event.eventparticipant.EventParticipant;
 import com.project.muttley.domain.event.eventstatus.EventStatus;
@@ -24,17 +19,19 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "event")
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Event {
+public class Event extends AuditableEntity {
   @Id
   @GeneratedValue
   private UUID id;
@@ -42,10 +39,10 @@ public class Event {
   private String title;
 
   private LocalDate dateStart;
-  private LocalTime hourStart;
 
   private LocalDate dateEnd;
-  private LocalTime hourEnd;
+
+  private Integer workLoad;
 
   private Long points;
 
@@ -70,18 +67,17 @@ public class Event {
 
   private String description;
 
-  private String observations;
-  private String requirements;
-
   @ManyToOne
   @JoinColumn(name = "publictype_id")
   private PublicType publicType;
 
-  // Certificate Template
-
   private String imageSignatureUrl;
 
   private String imageBackgroundUrl;
+
+  private String nameSignature;
+
+  private String positionSignature;
 
   private String imageQrCodeInscriptionUrl;
 
@@ -90,10 +86,4 @@ public class Event {
   @ManyToOne
   @JoinColumn(name = "status_id")
   private EventStatus eventStatus;
-
-  @CreatedDate
-  private LocalDateTime createdAt;
-
-  @LastModifiedDate
-  private LocalDateTime updatedAt;
 }
