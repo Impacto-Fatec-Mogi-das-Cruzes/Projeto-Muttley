@@ -58,6 +58,19 @@ services:
       AWS_S3_PUBLIC_BASE_URL: ${AWS_S3_PUBLIC_BASE_URL}
       APP_PUBLIC_BASE_URL: ${APP_PUBLIC_BASE_URL}
 
+  pdf_service:
+    image: node:20-alpine
+    container_name: pdf_service
+
+    working_dir: /app
+
+    volumes:
+      - ./pdf-service:/app
+
+    command: sh -c "npm install && npm run build && npm run dev"
+
+    ports:
+      - "1336:1336"
 volumes:
   postgres_data:
   maven_cache:
