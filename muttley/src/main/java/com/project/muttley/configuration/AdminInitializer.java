@@ -1,6 +1,5 @@
 package com.project.muttley.configuration;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,18 +8,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.project.muttley.domain.user.User;
 import com.project.muttley.repositories.UserRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @RequiredArgsConstructor
 public class AdminInitializer {
 
   @Bean
   CommandLineRunner initAdmin(
-      UserRepository repository,
+      UserRepository userRepository,
       PasswordEncoder encoder) {
 
     return args -> {
 
-      if (!repository.existsByEmail("admin@fatec.sp.gov.br")) {
+      if (!userRepository.existsByEmail("admin@fatec.sp.gov.br")) {
 
         User admin = new User();
 
@@ -30,7 +31,7 @@ public class AdminInitializer {
 
         admin.setRole("ADMIN");
 
-        repository.save(admin);
+        userRepository.save(admin);
 
         System.out.println("Admin user created!");
       }
