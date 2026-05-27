@@ -51,6 +51,7 @@ public class Participant extends AuditableEntity {
   @OneToMany(mappedBy = "participant")
   private List<Certificate> certificates = new ArrayList<>();
 
-  @OneToMany(mappedBy = "participant")
-  private List<Medal> medals = new ArrayList<>();
+  // @OneToMany(mappedBy = "participant")
+  // private List<Medal> medals = new ArrayList<>();
+  private Integer medals;
 }

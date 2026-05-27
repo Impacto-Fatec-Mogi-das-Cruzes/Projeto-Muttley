@@ -44,7 +44,7 @@ public class Event extends AuditableEntity {
 
   private Integer workLoad;
 
-  private Long points;
+  private Integer points;
 
   @ManyToOne
   @JoinColumn(name = "modality_id")

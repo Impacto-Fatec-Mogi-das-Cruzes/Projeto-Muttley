@@ -8,6 +8,8 @@ app.use(express.json());
 
 app.use('/api/certificate', CertificateRouter);
 
+app.get('/health', (_, res) => res.sendStatus(200));
+
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });

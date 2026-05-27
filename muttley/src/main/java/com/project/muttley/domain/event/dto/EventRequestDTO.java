@@ -15,7 +15,7 @@ public record EventRequestDTO(
     @NotNull(message = "Data inicial é obrigatória") LocalDate startDate,
     LocalDate endDate,
     Integer workload,
-    Long points,
+    Integer points,
     @NotBlank(message = "Tipo do evento é obrigatório") String typeId,
     String subject,
     @MaxKeywords(max = 10) String keywords,

@@ -1,5 +1,6 @@
 package com.project.muttley.repositories;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,4 +13,8 @@ public interface ParticipantRepository extends JpaRepository<Participant, UUID> 
   boolean existsByCpf(String cpf);
 
   Optional<Participant> findByCpf(String cpf);
+
+  List<Participant> findAllByIdIn(List<UUID> ids);
+
+  List<Participant> findAllByEmailIn(List<String> emails);
 }

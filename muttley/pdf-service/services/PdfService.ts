@@ -4,11 +4,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import sharp from 'sharp';
 import { CertificateDTO } from '../dtos/CertificateDTO';
+import { CertificateCustomDTO } from '../dtos/CertificateCustomDTO';
 
 type RGB = { r: number; g: number; b: number };
 
 const RED: RGB = { r: 0.698, g: 0.094, b: 0.122 };
 const DARK: RGB = { r: 0.1, g: 0.1, b: 0.1 };
+
+
 
 function drawCentred(
   page: PDFPage,
@@ -61,8 +64,43 @@ function drawWrappedCentred(
   return y;
 }
 
-async function toPng(buffer: Buffer): Promise<Buffer> {
-  return sharp(buffer).png().toBuffer();
+async function prepareImage(
+  pdfDoc: PDFDocument,
+  url: string
+) {
+
+  const buffer =
+    await urlToBuffer(url);
+
+  const png =
+    await sharp(buffer)
+      .png()
+      .toBuffer();
+
+  return pdfDoc.embedPng(png);
+}
+
+async function urlToBuffer(url: string): Promise<Buffer> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to fetch image ${url}: ${response.status} - ${text}`);
+    }
+
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.startsWith('image/')) {
+      throw new Error(`URL did not return an image: ${url} (content-type: ${contentType})`);
+    }
+
+    return Buffer.from(await response.arrayBuffer());
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function dateToText(dateStr: string): string {
@@ -92,34 +130,90 @@ export class PdfService {
   private static readonly ROBOTO_REGULAR = path.join(PdfService.FONT_DIR, 'Roboto.ttf');
   private static readonly ROBOTO_BOLD = path.join(PdfService.FONT_DIR, 'RobotoBold.ttf');
 
-  constructor(private dto: CertificateDTO) { }
+  constructor(private dto: CertificateDTO | CertificateCustomDTO) { }
 
-  async generate(): Promise<string> {
+  private isCustom(dto: CertificateDTO | CertificateCustomDTO): dto is CertificateCustomDTO {
+    return 'description' in dto;
+  }
+
+  private getSegments(): { text: string; bold: boolean }[] {
+    if (this.isCustom(this.dto)) {
+      return [
+        {
+          text: this.dto.description,
+          bold: false,
+        },
+      ];
+    }
+
+    const eventDate = dateToText(this.dto.day);
+
+    return [
+      { text: 'Ministrou a apresentação de ', bold: false },
+      { text: this.dto.presentation, bold: true },
+      { text: ', durante o evento ', bold: false },
+      { text: this.dto.event, bold: true },
+      {
+        text: `, realizada em ${eventDate} e promovida pela Fatec Zona Leste. Contabilizando carga horária total de ${this.dto.hours} hora(s).`,
+        bold: false,
+      },
+    ];
+  }
+  // async generate(): Promise<string> {
+  //   const pdfDoc = await PDFDocument.create();
+  //   pdfDoc.registerFontkit(fontkit);
+
+  //   const page = pdfDoc.addPage([PdfService.PAGE_WIDTH, PdfService.PAGE_HEIGHT]);
+
+  //   await this.drawBackground(pdfDoc, page);
+  //   await this.drawContent(pdfDoc, page);
+
+  //   const bytes = await pdfDoc.save();
+
+  //   if (!fs.existsSync(PdfService.OUTPUT_DIR)) {
+  //     fs.mkdirSync(PdfService.OUTPUT_DIR, { recursive: true });
+  //   }
+
+  //   const safeName = this.dto.name.replace(/\s+/g, '_');
+  //   const fileName = `certificate_${safeName}_${Date.now()}.pdf`;
+  //   const filePath = path.join(PdfService.OUTPUT_DIR, fileName);
+  //   fs.writeFileSync(filePath, Buffer.from(bytes));
+
+  //   return filePath;
+  // }
+
+  async generate(): Promise<Buffer> {
+
+    // PG 1
     const pdfDoc = await PDFDocument.create();
     pdfDoc.registerFontkit(fontkit);
 
-    const page = pdfDoc.addPage([PdfService.PAGE_WIDTH, PdfService.PAGE_HEIGHT]);
+    const page = pdfDoc.addPage([
+      PdfService.PAGE_WIDTH,
+      PdfService.PAGE_HEIGHT,
+    ]);
 
     await this.drawBackground(pdfDoc, page);
     await this.drawContent(pdfDoc, page);
 
+    // PG 2
+    await this.drawCodePage(pdfDoc);
+
     const bytes = await pdfDoc.save();
 
-    if (!fs.existsSync(PdfService.OUTPUT_DIR)) {
-      fs.mkdirSync(PdfService.OUTPUT_DIR, { recursive: true });
-    }
-
-    const safeName = this.dto.name.replace(/\s+/g, '_');
-    const fileName = `certificate_${safeName}_${Date.now()}.pdf`;
-    const filePath = path.join(PdfService.OUTPUT_DIR, fileName);
-    fs.writeFileSync(filePath, Buffer.from(bytes));
-
-    return filePath;
+    return Buffer.from(bytes);
   }
 
-  private async drawBackground(pdfDoc: PDFDocument, page: PDFPage): Promise<void> {
-    const png = await toPng(this.dto.backgroundImage);
-    const img = await pdfDoc.embedPng(png);
+  private async drawBackground(
+    pdfDoc: PDFDocument,
+    page: PDFPage
+  ): Promise<void> {
+
+    const img = await prepareImage(
+      pdfDoc,
+      this.dto.backgroundImageUrl
+    );
+
     page.drawImage(img, {
       x: 0,
       y: 0,
@@ -128,7 +222,44 @@ export class PdfService {
     });
   }
 
-  private async drawContent(pdfDoc: PDFDocument, page: PDFPage): Promise<void> {
+  private async drawCodePage(pdfDoc: PDFDocument): Promise<void> {
+    const page = pdfDoc.addPage([
+      PdfService.PAGE_WIDTH,
+      PdfService.PAGE_HEIGHT,
+    ]);
+
+    const W = PdfService.PAGE_WIDTH;
+    const H = PdfService.PAGE_HEIGHT;
+
+    const regularBytes = fs.readFileSync(PdfService.ROBOTO_REGULAR);
+    const boldBytes = fs.readFileSync(PdfService.ROBOTO_BOLD);
+
+    const regularFont = await pdfDoc.embedFont(regularBytes);
+    const boldFont = await pdfDoc.embedFont(boldBytes);
+
+    const code = this.dto.certificateCode;
+
+    // título
+    drawCentred(
+      page,
+      'CÓDIGO',
+      boldFont,
+      38,
+      H / 2 + 60,
+      RED
+    );
+
+    const safeCode = code.trim().toUpperCase();
+    // código
+    drawCentred(page, safeCode, boldFont, 24, H / 2, DARK);
+  }
+
+
+  private async drawContent(
+    pdfDoc: PDFDocument,
+    page: PDFPage
+  ): Promise<void> {
+
     const regularBytes = fs.readFileSync(PdfService.ROBOTO_REGULAR);
     const boldBytes = fs.readFileSync(PdfService.ROBOTO_BOLD);
 
@@ -137,21 +268,32 @@ export class PdfService {
 
     const W = PdfService.PAGE_WIDTH;
     const H = PdfService.PAGE_HEIGHT;
-    const margin = 80;
-    const textWidth = W - margin * 2;
 
-    drawCentred(page, 'Certificamos que', regularFont, 14, H - 185, DARK);
-    drawCentred(page, this.dto.name.toUpperCase(), boldFont, 22, H - 215, DARK);
+    const isCustom = this.isCustom(this.dto);
 
-    const eventDate = dateToText(this.dto.day);
+    const textWidth = W - 160
 
-    const segments: { text: string; bold: boolean }[] = [
-      { text: 'Ministrou a apresentação de ', bold: false },
-      { text: this.dto.presentation, bold: true },
-      { text: ', durante o evento ', bold: false },
-      { text: this.dto.event, bold: true },
-      { text: `, realizada em ${eventDate} e promovida pela Fatec Zona Leste. Contabilizando carga horária total de ${this.dto.hours} hora(s).`, bold: false },
-    ];
+    const margin = (W - textWidth) / 2;
+
+    drawCentred(
+      page,
+      'Certificamos que',
+      regularFont,
+      14,
+      H - 185,
+      DARK
+    );
+
+    drawCentred(
+      page,
+      this.dto.name.toUpperCase(),
+      boldFont,
+      22,
+      H - 215,
+      DARK
+    );
+
+    const segments = this.getSegments();
 
     const bodyEndY = this.drawJustifiedMixed(
       page,
@@ -166,9 +308,23 @@ export class PdfService {
     );
 
     const dateY = bodyEndY - 24;
-    drawCentred(page, `São Paulo, ${todayText()}.`, regularFont, 14, dateY, DARK);
 
-    await this.drawSignatureBlock(pdfDoc, page, dateY - 16, regularFont, boldFont);
+    drawCentred(
+      page,
+      `São Paulo, ${todayText()}.`,
+      regularFont,
+      14,
+      dateY,
+      DARK
+    );
+
+    await this.drawSignatureBlock(
+      pdfDoc,
+      page,
+      dateY - 16,
+      regularFont,
+      boldFont
+    );
   }
 
   private drawJustifiedMixed(
@@ -267,15 +423,30 @@ export class PdfService {
     regularFont: PDFFont,
     boldFont: PDFFont
   ): Promise<void> {
+
     const W = PdfService.PAGE_WIDTH;
 
-    const sigPng = await toPng(this.dto.signatureImage);
-    const sigImg = await pdfDoc.embedPng(sigPng);
+    const sigImg = await prepareImage(
+      pdfDoc,
+      this.dto.signatureImageUrl
+    );
+
     const sigMeta = sigImg.scale(1);
-    const sigScale = Math.min(160 / sigMeta.width, 60 / sigMeta.height);
-    const sigW = sigMeta.width * sigScale;
-    const sigH = sigMeta.height * sigScale;
-    const sigY = topY - sigH;
+
+    const sigScale =
+      Math.min(
+        160 / sigMeta.width,
+        60 / sigMeta.height
+      );
+
+    const sigW =
+      sigMeta.width * sigScale;
+
+    const sigH =
+      sigMeta.height * sigScale;
+
+    const sigY =
+      topY - sigH;
 
     page.drawImage(sigImg, {
       x: (W - sigW) / 2,
@@ -286,6 +457,7 @@ export class PdfService {
 
     const lineW = 200;
     const lineY = sigY - 8;
+
     page.drawLine({
       start: { x: (W - lineW) / 2, y: lineY },
       end: { x: (W + lineW) / 2, y: lineY },
@@ -293,7 +465,14 @@ export class PdfService {
       color: rgb(0.3, 0.3, 0.3),
     });
 
-    drawCentred(page, this.dto.responsible.toUpperCase(), boldFont, 12, lineY - 16, RED);
+    drawCentred(
+      page,
+      this.dto.responsible.toUpperCase(),
+      boldFont,
+      12,
+      lineY - 16,
+      RED
+    );
 
     drawWrappedCentred(
       page,

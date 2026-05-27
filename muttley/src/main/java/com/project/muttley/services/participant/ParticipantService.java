@@ -1,5 +1,8 @@
 package com.project.muttley.services.participant;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +43,7 @@ public class ParticipantService {
     newParticipant.setName(dto.name());
     newParticipant.setEmail(dto.email());
     newParticipant.setPoints(0);
+    newParticipant.setMedals(0);
 
     participantRepository.save(newParticipant);
 
@@ -68,6 +72,48 @@ public class ParticipantService {
         p.getEmail(),
         p.getPoints(),
         p.getCertificates().size(),
-        p.getMedals().size()));
+        // p.getMedals().size()));
+        p.getMedals()));
   }
+
+  public List<Participant> getByIds(List<UUID> ids) {
+    List<Participant> participants = participantRepository.findAllByIdIn(ids);
+
+    if (participants.size() != ids.size()) {
+      throw new RuntimeException("Nenhum participante encontrado");
+    }
+
+    return participants;
+  }
+
+  public void addPoints(UUID id, Integer quantity) {
+
+    Participant foundParticipant = participantRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Erro ao encontrar participante"));
+
+    int currentPoints = foundParticipant.getPoints() != null
+        ? foundParticipant.getPoints()
+        : 0;
+
+    foundParticipant.setPoints(currentPoints + quantity);
+
+    participantRepository.save(foundParticipant);
+  }
+
+  public void addMedals(UUID id, Integer quantity) {
+
+    Participant foundParticipant = participantRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Erro ao encontrar participante"));
+
+    // TODO For a while it'll be just a Integer, but eventualy it can count medals
+    // related with the participant, like just picking the medals.size
+    int currentMedals = foundParticipant.getMedals() != null
+        ? foundParticipant.getMedals()
+        : 0;
+
+    foundParticipant.setMedals(currentMedals + quantity);
+
+    participantRepository.save(foundParticipant);
+  }
+
 }

@@ -13,7 +13,7 @@ public record EventDetailDTO(
     LocalDate startDate,
     LocalDate endDate,
     Integer workload,
-    Long points,
+    Integer points,
     UUID typeId,
     String typeName,
     String subject,

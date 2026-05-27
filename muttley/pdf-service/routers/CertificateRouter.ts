@@ -1,17 +1,15 @@
 import { Router } from 'express';
-import multer from 'multer';
 import { CertificateController } from '../controllers/CertificateController';
 
 const router = Router();
 const controller = new CertificateController();
 
-const upload = multer({ storage: multer.memoryStorage() });
+router.post('/generate', (req, res) =>
+  controller.generate(req, res)
+);
 
-const imageFields = upload.fields([
-  { name: 'backgroundImage', maxCount: 1 },
-  { name: 'signatureImage', maxCount: 1 },
-]);
-
-router.post('/generate', imageFields, (req, res) => controller.generate(req, res));
+router.post('/generate-custom', (req, res) =>
+  controller.generateCustom(req, res)
+);
 
 export default router;
