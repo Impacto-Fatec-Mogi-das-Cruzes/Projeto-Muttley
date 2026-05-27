@@ -3,6 +3,7 @@ package com.project.muttley.domain.certificate;
 import java.util.UUID;
 
 import com.project.muttley.domain.base.AuditableEntity;
+import com.project.muttley.domain.event.Event;
 import com.project.muttley.domain.participant.Participant;
 
 import jakarta.persistence.Entity;
@@ -33,4 +34,8 @@ public class Certificate extends AuditableEntity {
   @ManyToOne
   @JoinColumn(name = "participant")
   private Participant participant;
+
+  @ManyToOne
+  @JoinColumn(name = "event")
+  private Event event;
 }

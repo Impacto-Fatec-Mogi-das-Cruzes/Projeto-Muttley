@@ -3,11 +3,19 @@ package com.project.muttley.services.event;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.project.muttley.domain.certificate.Certificate;
+import com.project.muttley.domain.certificate.dto.CertificateGenerateCustomDTO;
+import com.project.muttley.domain.certificate.dto.CertificateGenerateDTO;
+import com.project.muttley.domain.certificate.dto.CertificateRequestDTO;
 import com.project.muttley.domain.event.Event;
 import com.project.muttley.domain.event.EventKeywords;
 import com.project.muttley.domain.event.dto.EventDetailDTO;
@@ -32,6 +40,9 @@ import com.project.muttley.repositories.EventStatusRepository;
 import com.project.muttley.repositories.EventTypeRepository;
 import com.project.muttley.repositories.ParticipantRepository;
 import com.project.muttley.repositories.ParticipantTypeRepository;
+import com.project.muttley.services.certificate.CertificateService;
+import com.project.muttley.services.email.EmailService;
+import com.project.muttley.services.participant.ParticipantService;
 import com.project.muttley.services.storage.QrCodeService;
 import com.project.muttley.services.storage.S3StorageService;
 
@@ -53,8 +64,23 @@ public class EventService {
   private final QrCodeService qrCodeService;
   private final EventMapper eventMapper;
 
+  @Autowired
+  private RestClient pdfRestClient;
+
+  @Autowired
+  private CertificateService certificateService;
+
+  @Autowired
+  private ParticipantService participantService;
+
+  @Autowired
+  private EmailService emailService;
+
+  @Value("${spring.mail.from}")
+  private String emailFrom;
+
   @Transactional
-  public EventResponseDTO create(EventRequestDTO request, MultipartFile signature) {
+  public EventResponseDTO create(EventRequestDTO request, MultipartFile signature, MultipartFile background) {
     requireSignature(signature);
     validarRegrasEvento(request);
 
@@ -68,7 +94,10 @@ public class EventService {
     event.setEventStatus(status);
 
     Event saved = eventRepository.save(event);
+
     applySignatureUpload(saved, signature, true);
+    applyBackgroundUpload(saved, background, true);
+
     gerarEArmazenarQRCodes(saved);
     syncStaff(saved, request);
 
@@ -83,6 +112,10 @@ public class EventService {
 
   public EventResponseDTO findById(UUID id) {
     return eventMapper.toResponse(findEventById(id));
+  }
+
+  public Event getById(UUID id) {
+    return eventRepository.findById(id).orElseThrow(() -> new RuntimeException("Evento não encontrado: " + id));
   }
 
   public EventDetailDTO findDetails(UUID id, String role, Pageable pageable) {
@@ -111,7 +144,7 @@ public class EventService {
   }
 
   @Transactional
-  public EventResponseDTO update(UUID id, EventRequestDTO request, MultipartFile signature) {
+  public EventResponseDTO update(UUID id, EventRequestDTO request, MultipartFile signature, MultipartFile background) {
     validarRegrasEvento(request);
     Event event = findEventById(id);
     ensureNotFinalized(event);
@@ -122,6 +155,7 @@ public class EventService {
     eventMapper.applyRequest(event, request, modality, eventType);
     ajustarDataFim(event);
     applySignatureUpload(event, signature, false);
+    applyBackgroundUpload(event, background, false);
     if (event.getImageQrCodeInscriptionUrl() == null || event.getImageQrCodePresenceUrl() == null) {
       gerarEArmazenarQRCodes(event);
     }
@@ -151,6 +185,50 @@ public class EventService {
     }
 
     event.setEventStatus(finalizedStatus);
+
+    List<Participant> participants = event.getEventParticipants()
+        .stream()
+        .map(EventParticipant::getParticipant)
+        .toList();
+
+    for (Participant participant : participants) {
+      CertificateRequestDTO certificateDTO = new CertificateRequestDTO(participant.getId(), event.getId());
+
+      // TODO verify if really need to add points for every participant
+      Certificate newCertificate = certificateService.create(certificateDTO);
+
+      participantService.addPoints(participant.getId(), event.getPoints());
+
+      CertificateGenerateDTO dto = new CertificateGenerateDTO(participant.getName(), event.getSubject(),
+          event.getTitle(), event.getDateStart().toString(), event.getWorkLoad(), event.getNameSignature(),
+          event.getPositionSignature(), event.getImageBackgroundUrl(), event.getImageSignatureUrl(),
+          newCertificate.getId().toString());
+
+      byte[] pdf = pdfRestClient.post()
+          .uri("/api/certificate/generate")
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(dto)
+          .retrieve()
+          .body(byte[].class);
+
+      String urlStorage = s3StorageService.uploadParticipantCertificate(
+          pdf,
+          participant.getId(),
+          newCertificate.getId());
+
+      certificateService.updateUrlCertificate(newCertificate.getId(), urlStorage);
+
+      List<String> competencies = EventKeywords.parse(event.getKeywords());
+      EventKeywords.validateMax(event.getKeywords(), 10);
+
+      emailService.sendEmail(
+          emailFrom,
+          participant.getEmail(),
+          "Seu certificado do evento " + event.getTitle() + "está disponível",
+          emailService.buildEmailHtmlParticipantion(event.getTitle(), competencies),
+          pdf);
+    }
+
     return eventMapper.toResponse(eventRepository.save(event));
   }
 
@@ -225,6 +303,34 @@ public class EventService {
     String previousUrl = event.getImageSignatureUrl();
     String newUrl = s3StorageService.uploadEventSignature(signature, event.getId());
     event.setImageSignatureUrl(newUrl);
+
+    if (previousUrl != null && !previousUrl.equals(newUrl)) {
+      s3StorageService.deleteByUrl(previousUrl);
+    }
+  }
+
+  private void applyBackgroundUpload(
+      Event event,
+      MultipartFile background,
+      boolean required) {
+
+    if (background == null || background.isEmpty()) {
+
+      if (required) {
+        throw new IllegalArgumentException(
+            "O background do evento é obrigatório");
+      }
+
+      return;
+    }
+
+    String previousUrl = event.getImageBackgroundUrl();
+
+    String newUrl = s3StorageService.uploadEventBackground(
+        background,
+        event.getId());
+
+    event.setImageBackgroundUrl(newUrl);
 
     if (previousUrl != null && !previousUrl.equals(newUrl)) {
       s3StorageService.deleteByUrl(previousUrl);

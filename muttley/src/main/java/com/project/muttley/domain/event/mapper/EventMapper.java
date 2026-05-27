@@ -72,6 +72,7 @@ public class EventMapper {
         event.getDescription(),
         event.getCapacity(),
         event.getAddressOrLink(),
+        event.getImageBackgroundUrl(),
         event.getImageSignatureUrl(),
         event.getNameSignature(),
         event.getPositionSignature(),

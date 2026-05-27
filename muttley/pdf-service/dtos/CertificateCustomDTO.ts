@@ -1,9 +1,6 @@
-export interface CertificateDTO {
+export interface CertificateCustomDTO {
   name: string;
-  presentation: string;
-  event: string;
-  day: string;
-  hours: number;
+  description: string;
   responsible: string;
   responsibleDescription: string;
   backgroundImageUrl: string;

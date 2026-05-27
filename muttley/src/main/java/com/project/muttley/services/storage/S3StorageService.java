@@ -77,6 +77,84 @@ public class S3StorageService {
     }
   }
 
+  public String uploadEventBackground(
+      MultipartFile file,
+      UUID eventId) {
+
+    validateBucketConfigured();
+    validateSignatureFile(file);
+
+    String extension = resolveExtension(file);
+
+    String key = "events/"
+        + eventId
+        + "/background-"
+        + UUID.randomUUID()
+        + extension;
+
+    try {
+
+      PutObjectRequest request = PutObjectRequest.builder()
+          .bucket(s3Properties.bucket())
+          .key(key)
+          .contentType(file.getContentType())
+          .build();
+
+      s3Client.putObject(
+          request,
+          RequestBody.fromInputStream(
+              file.getInputStream(),
+              file.getSize()));
+
+      return buildPublicUrl(key);
+
+    } catch (IOException ex) {
+
+      throw new FileStorageException(
+          "Falha ao ler background do evento",
+          ex);
+
+    } catch (Exception ex) {
+
+      throw new FileStorageException(
+          "Falha ao enviar background para o S3",
+          ex);
+    }
+  }
+
+  public String uploadParticipantCertificate(
+      byte[] content,
+      UUID participantId,
+      UUID certificateId) {
+    validateBucketConfigured();
+
+    String key = "participants/"
+        + participantId
+        + "/certificates/"
+        + certificateId
+        + ".pdf";
+
+    try (InputStream stream = new java.io.ByteArrayInputStream(content)) {
+
+      PutObjectRequest request = PutObjectRequest.builder()
+          .bucket(s3Properties.bucket())
+          .key(key)
+          .contentType("application/pdf")
+          .build();
+
+      s3Client.putObject(
+          request,
+          RequestBody.fromInputStream(stream, content.length));
+
+      return buildPublicUrl(key);
+
+    } catch (IOException ex) {
+      throw new FileStorageException("Falha ao ler o certificado PDF", ex);
+    } catch (Exception ex) {
+      throw new FileStorageException("Falha ao enviar certificado para o S3", ex);
+    }
+  }
+
   public void deleteByUrl(String fileUrl) {
     if (!StringUtils.hasText(fileUrl)) {
       return;

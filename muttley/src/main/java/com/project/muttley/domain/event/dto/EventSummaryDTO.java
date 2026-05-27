@@ -11,5 +11,5 @@ public record EventSummaryDTO(
     String statusName,
     String typeName,
     String modalityName,
-    Long points) {
+    Integer points) {
 }
