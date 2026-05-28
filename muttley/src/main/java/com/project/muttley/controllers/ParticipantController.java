@@ -26,18 +26,15 @@ public class ParticipantController {
   private ParticipantService participantService;
 
   @GetMapping
-  public ResponseEntity<Page<ParticipantResponseDTO>> getParticipants(
-
+  public ResponseEntity<Page<ParticipantResponseDTO>> get(
       @RequestParam(defaultValue = "0") int page,
-
       @RequestParam(defaultValue = "10") int size,
-
       @RequestParam(defaultValue = "name") String sortBy,
-
-      @RequestParam(defaultValue = "asc") String direction) {
+      @RequestParam(defaultValue = "asc") String direction,
+      @RequestParam(required = false) String search) {
 
     return ResponseEntity.ok(
-        participantService.get(page, size, sortBy, direction));
+        participantService.get(page, size, sortBy, direction, search));
   }
 
   @PostMapping

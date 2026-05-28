@@ -9,4 +9,5 @@ export interface CertificateDTO {
   backgroundImageUrl: string;
   signatureImageUrl: string;
   certificateCode: string;
+  qrCodeUrl: string;
 }

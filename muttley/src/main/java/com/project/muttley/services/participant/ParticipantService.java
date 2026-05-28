@@ -55,7 +55,15 @@ public class ParticipantService {
       int page,
       int size,
       String sortBy,
-      String direction) {
+      String direction,
+      String search) {
+
+    // permite ordenar apenas por name ou points
+    if (!sortBy.equalsIgnoreCase("name") &&
+        !sortBy.equalsIgnoreCase("points")) {
+
+      sortBy = "name";
+    }
 
     Sort sort = direction.equalsIgnoreCase("desc")
         ? Sort.by(sortBy).descending()
@@ -63,7 +71,14 @@ public class ParticipantService {
 
     Pageable pageable = PageRequest.of(page, size, sort);
 
-    Page<Participant> participants = participantRepository.findAll(pageable);
+    Page<Participant> participants;
+
+    if (search == null || search.isBlank()) {
+      participants = participantRepository.findAll(pageable);
+    } else {
+      participants = participantRepository
+          .findByNameContainingIgnoreCase(search, pageable);
+    }
 
     return participants.map(p -> new ParticipantResponseDTO(
         p.getId(),
@@ -72,8 +87,8 @@ public class ParticipantService {
         p.getEmail(),
         p.getPoints(),
         p.getCertificates().size(),
-        // p.getMedals().size()));
-        p.getMedals()));
+        p.getMedals(),
+        p.getCreatedAt()));
   }
 
   public List<Participant> getByIds(List<UUID> ids) {

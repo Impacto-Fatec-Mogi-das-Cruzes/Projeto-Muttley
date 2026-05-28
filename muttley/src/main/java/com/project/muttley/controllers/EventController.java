@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.project.muttley.domain.event.dto.EventDetailDTO;
+import com.project.muttley.domain.event.dto.EventParticipantDetailDTO;
 import com.project.muttley.domain.event.dto.EventRequestDTO;
 import com.project.muttley.domain.event.dto.EventResponseDTO;
 import com.project.muttley.domain.event.dto.EventRewardDTO;
@@ -86,6 +87,24 @@ public class EventController {
         "Events listed successfully",
         httpRequest.getRequestURI(),
         response);
+    return ResponseEntity.ok(body);
+  }
+
+  @GetMapping("/participants/{id}")
+  public ResponseEntity<ApiResponse<Page<EventParticipantDetailDTO>>> findAllByParticipant(
+      @PathVariable UUID id,
+      @RequestParam(required = false) String title,
+      Pageable pageable,
+      HttpServletRequest httpRequest) {
+
+    Page<EventParticipantDetailDTO> response = eventService.getEventParticipant(id, title, pageable);
+
+    ApiResponse<Page<EventParticipantDetailDTO>> body = ApiResponse.success(
+        HttpStatus.OK.value(),
+        "Eventos de Participante listados com sucesso!",
+        httpRequest.getRequestURI(),
+        response);
+
     return ResponseEntity.ok(body);
   }
 

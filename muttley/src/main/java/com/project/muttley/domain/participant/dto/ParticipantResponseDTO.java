@@ -1,5 +1,6 @@
 package com.project.muttley.domain.participant.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record ParticipantResponseDTO(
@@ -9,6 +10,7 @@ public record ParticipantResponseDTO(
     String email,
     Integer points,
     Integer certificates,
-    Integer medals) {
+    Integer medals,
+    LocalDateTime createdAt) {
 
 }

@@ -9,6 +9,7 @@ public record CertificateGenerateCustomDTO(
     @NotBlank String responsibleDescription,
     @NotBlank String backgroundImageUrl,
     @NotBlank String signatureImageUrl,
-    @NotBlank String certificateCode) {
+    @NotBlank String certificateCode,
+    @NotBlank String qrCodeUrl) {
 
 }

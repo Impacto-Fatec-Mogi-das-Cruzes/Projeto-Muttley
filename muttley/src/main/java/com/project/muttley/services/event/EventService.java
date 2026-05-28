@@ -19,6 +19,7 @@ import com.project.muttley.domain.certificate.dto.CertificateRequestDTO;
 import com.project.muttley.domain.event.Event;
 import com.project.muttley.domain.event.EventKeywords;
 import com.project.muttley.domain.event.dto.EventDetailDTO;
+import com.project.muttley.domain.event.dto.EventParticipantDetailDTO;
 import com.project.muttley.domain.event.dto.EventParticipantItemDTO;
 import com.project.muttley.domain.event.dto.EventRequestDTO;
 import com.project.muttley.domain.event.dto.EventResponseDTO;
@@ -79,6 +80,9 @@ public class EventService {
   @Value("${spring.mail.from}")
   private String emailFrom;
 
+  @Value("${app.public-base-url}")
+  private String frontUrl;
+
   @Transactional
   public EventResponseDTO create(EventRequestDTO request, MultipartFile signature, MultipartFile background) {
     requireSignature(signature);
@@ -108,6 +112,35 @@ public class EventService {
     return eventRepository
         .findAllFiltered(title, pageable)
         .map(eventMapper::toSummary);
+  }
+
+  public Page<EventParticipantDetailDTO> getEventParticipant(
+      UUID participantId,
+      String search,
+      Pageable pageable) {
+
+    Page<Event> events;
+
+    if (search == null || search.isBlank()) {
+      events = eventRepository
+          .findByEventParticipantsParticipantId(participantId, pageable);
+    } else {
+      events = eventRepository
+          .findByTitleContainingIgnoreCaseAndEventParticipantsParticipantId(
+              search,
+              participantId,
+              pageable);
+    }
+
+    return events.map(e -> new EventParticipantDetailDTO(
+        e.getId(),
+        e.getTitle(),
+        e.getModality(),
+        e.getDateStart(),
+        e.getDateEnd() != null
+            ? e.getDateEnd().toString()
+            : "Não definido",
+        e.getEventStatus()));
   }
 
   public EventResponseDTO findById(UUID id) {
@@ -188,6 +221,7 @@ public class EventService {
 
     List<Participant> participants = event.getEventParticipants()
         .stream()
+        .filter(ep -> Boolean.TRUE.equals(ep.getPresent()))
         .map(EventParticipant::getParticipant)
         .toList();
 
@@ -199,10 +233,12 @@ public class EventService {
 
       participantService.addPoints(participant.getId(), event.getPoints());
 
+      String certificateQrUrl = frontUrl + "/certificate/" + newCertificate.getId();
+
       CertificateGenerateDTO dto = new CertificateGenerateDTO(participant.getName(), event.getSubject(),
           event.getTitle(), event.getDateStart().toString(), event.getWorkLoad(), event.getNameSignature(),
           event.getPositionSignature(), event.getImageBackgroundUrl(), event.getImageSignatureUrl(),
-          newCertificate.getId().toString());
+          newCertificate.getId().toString(), certificateQrUrl);
 
       byte[] pdf = pdfRestClient.post()
           .uri("/api/certificate/generate")
