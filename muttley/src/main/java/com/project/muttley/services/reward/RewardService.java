@@ -9,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.muttley.domain.certificate.Certificate;
 import com.project.muttley.domain.certificate.dto.CertificateGenerateCustomDTO;
 import com.project.muttley.domain.certificate.dto.CertificateRequestDTO;

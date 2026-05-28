@@ -83,7 +83,7 @@ public class EmailService {
             }
 
             .header {
-              background: #7c3aed;
+              background: #e01111;
               color: white;
               padding: 32px 24px;
               text-align: center;
@@ -130,7 +130,7 @@ public class EmailService {
             }
 
             .event-title {
-              color: #7c3aed;
+              color: #e01111;
               font-weight: bold;
             }
           </style>
@@ -241,7 +241,7 @@ public class EmailService {
             }
 
             .header {
-              background: #7c3aed;
+              background: #e01111;
               color: white;
               padding: 32px 24px;
               text-align: center;
@@ -288,7 +288,7 @@ public class EmailService {
             }
 
             .event-title {
-              color: #7c3aed;
+              color: #e01111;
               font-weight: bold;
             }
           </style>

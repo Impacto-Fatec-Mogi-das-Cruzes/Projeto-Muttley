@@ -13,7 +13,6 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.project.muttley.domain.certificate.Certificate;
-import com.project.muttley.domain.certificate.dto.CertificateGenerateCustomDTO;
 import com.project.muttley.domain.certificate.dto.CertificateGenerateDTO;
 import com.project.muttley.domain.certificate.dto.CertificateRequestDTO;
 import com.project.muttley.domain.event.Event;
