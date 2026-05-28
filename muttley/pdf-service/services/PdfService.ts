@@ -6,6 +6,8 @@ import sharp from 'sharp';
 import { CertificateDTO } from '../dtos/CertificateDTO';
 import { CertificateCustomDTO } from '../dtos/CertificateCustomDTO';
 
+import QRCode from 'qrcode';
+
 type RGB = { r: number; g: number; b: number };
 
 const RED: RGB = { r: 0.698, g: 0.094, b: 0.122 };
@@ -231,27 +233,44 @@ export class PdfService {
     const W = PdfService.PAGE_WIDTH;
     const H = PdfService.PAGE_HEIGHT;
 
-    const regularBytes = fs.readFileSync(PdfService.ROBOTO_REGULAR);
     const boldBytes = fs.readFileSync(PdfService.ROBOTO_BOLD);
-
-    const regularFont = await pdfDoc.embedFont(regularBytes);
+    const regularBytes = fs.readFileSync(PdfService.ROBOTO_REGULAR);
     const boldFont = await pdfDoc.embedFont(boldBytes);
+    const regularFont = await pdfDoc.embedFont(regularBytes);
 
-    const code = this.dto.certificateCode;
+    // ── título "CERTIFICADO" ─────────────────────────────────────────
+    drawCentred(page, 'CERTIFICADO', boldFont, 38, H - 80, RED);
 
-    // título
+    // ── gera o QR code como PNG a partir da URL (texto) ──────────────
+    const qrPngBuffer = await QRCode.toBuffer(this.dto.qrCodeUrl, {
+      type: 'png',
+      width: 300,
+      margin: 1,
+      color: { dark: '#1a1a1a', light: '#ffffff' },
+    });
+
+    const qrImage = await pdfDoc.embedPng(qrPngBuffer);
+
+    const qrSize = 200;
+    const qrX = (W - qrSize) / 2;
+    const qrY = H / 2 - qrSize / 2 + 20; // levemente acima do centro
+
+    page.drawImage(qrImage, {
+      x: qrX,
+      y: qrY,
+      width: qrSize,
+      height: qrSize,
+    });
+
+    // ── código abaixo do QR ──────────────────────────────────────────
     drawCentred(
       page,
-      'CÓDIGO',
-      boldFont,
-      38,
-      H / 2 + 60,
-      RED
+      this.dto.certificateCode.trim(),
+      regularFont,
+      13,
+      qrY - 28,
+      DARK
     );
-
-    const safeCode = code.trim().toUpperCase();
-    // código
-    drawCentred(page, safeCode, boldFont, 24, H / 2, DARK);
   }
 
 

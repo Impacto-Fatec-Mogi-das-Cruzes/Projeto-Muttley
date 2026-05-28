@@ -48,6 +48,9 @@ public class RewardService {
   @Value("${spring.mail.from}")
   private String emailFrom;
 
+  @Value("${app.public-base-url}")
+  private String frontUrl;
+
   @Transactional
   public String rewardParticipants(
       List<UUID> participantIds,
@@ -69,10 +72,12 @@ public class RewardService {
       participantService.addMedals(participant.getId(), 1);
       Certificate newCertificate = certificateService.create(certificateDTO);
 
+      String certificateQrUrl = frontUrl + "/certificate/" + newCertificate.getId();
+
       // TODO probably here will change imagebackground from url to file
       CertificateGenerateCustomDTO dto = new CertificateGenerateCustomDTO(participant.getName(), description,
           event.getNameSignature(), event.getPositionSignature(), event.getImageBackgroundUrl(),
-          event.getImageSignatureUrl(), newCertificate.getId().toString());
+          event.getImageSignatureUrl(), newCertificate.getId().toString(), certificateQrUrl);
 
       byte[] pdf = pdfRestClient.post()
           .uri("/api/certificate/generate-custom")

@@ -38,7 +38,8 @@ export class CertificateController {
         responsibleDescription,
         backgroundImageUrl,
         signatureImageUrl,
-        certificateCode
+        certificateCode,
+        qrCodeUrl
       } = req.body;
 
       const commonValidation =
@@ -46,13 +47,14 @@ export class CertificateController {
         !responsible ||
         !responsibleDescription ||
         !backgroundImageUrl ||
-        !signatureImageUrl
-      !certificateCode;
+        !signatureImageUrl ||
+        !certificateCode ||
+        !qrCodeUrl;
 
       if (commonValidation) {
         res.status(400).json({
           error:
-            'Required: name, responsible, responsibleDescription, backgroundImageUrl, signatureImageUrl, certificateCode.',
+            'Required: name, responsible, responsibleDescription, backgroundImageUrl, signatureImageUrl, certificateCode e qrCodeUrl.',
         });
 
         return;
@@ -79,7 +81,8 @@ export class CertificateController {
           responsibleDescription,
           backgroundImageUrl,
           signatureImageUrl,
-          certificateCode
+          certificateCode,
+          qrCodeUrl
         };
 
       } else {
@@ -109,7 +112,8 @@ export class CertificateController {
           responsibleDescription,
           backgroundImageUrl,
           signatureImageUrl,
-          certificateCode
+          certificateCode,
+          qrCodeUrl
         };
       }
 

@@ -17,4 +17,13 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
       WHERE (:title IS NULL OR :title = '' OR LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%')))
       """)
   Page<Event> findAllFiltered(@Param("title") String title, Pageable pageable);
+
+  Page<Event> findByEventParticipantsParticipantId(
+      UUID participantId,
+      Pageable pageable);
+
+  Page<Event> findByTitleContainingIgnoreCaseAndEventParticipantsParticipantId(
+      String title,
+      UUID participantId,
+      Pageable pageable);
 }

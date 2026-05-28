@@ -6,4 +6,5 @@ export interface CertificateCustomDTO {
   backgroundImageUrl: string;
   signatureImageUrl: string;
   certificateCode: string;
+  qrCodeUrl: string;
 }
