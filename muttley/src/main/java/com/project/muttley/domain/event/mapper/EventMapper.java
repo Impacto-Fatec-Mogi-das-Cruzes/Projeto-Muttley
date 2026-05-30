@@ -113,6 +113,7 @@ public class EventMapper {
         organizers,
         speakers,
         sponsors,
+        event.getImageBackgroundUrl(),
         event.getImageSignatureUrl(),
         event.getNameSignature(),
         event.getPositionSignature(),

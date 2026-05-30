@@ -26,6 +26,7 @@ public record EventDetailDTO(
     List<EventStaffDTO> organizers,
     List<EventStaffDTO> speakers,
     List<EventStaffDTO> sponsors,
+    String imageBackgroundUrl,
     String signatureImageUrl,
     String nameSignature,
     String positionSignature,
