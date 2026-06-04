@@ -7,7 +7,6 @@ import java.util.UUID;
 import com.project.muttley.domain.base.AuditableEntity;
 import com.project.muttley.domain.certificate.Certificate;
 import com.project.muttley.domain.competency.Competency;
-import com.project.muttley.domain.medal.Medal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
