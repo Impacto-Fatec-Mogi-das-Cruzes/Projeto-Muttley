@@ -42,6 +42,8 @@ public class EventMapper {
     event.setTitle(dto.title());
     event.setDateStart(dto.startDate());
     event.setDateEnd(dto.endDate());
+    event.setHourStart(dto.startHour());
+    event.setHourEnd(dto.endHour());
     event.setWorkLoad(dto.workload());
     event.setPoints(dto.points());
     event.setModality(modality);
@@ -60,7 +62,9 @@ public class EventMapper {
         event.getId(),
         event.getTitle(),
         event.getDateStart(),
+        event.getHourStart(),
         event.getDateEnd(),
+        event.getHourEnd(),
         event.getWorkLoad(),
         event.getPoints(),
         refId(event.getEventType()),
@@ -98,7 +102,9 @@ public class EventMapper {
         event.getId(),
         event.getTitle(),
         event.getDateStart(),
+        event.getHourStart(),
         event.getDateEnd(),
+        event.getHourEnd(),
         event.getWorkLoad(),
         event.getPoints(),
         refId(event.getEventType()),
@@ -135,7 +141,9 @@ public class EventMapper {
         event.getId(),
         event.getTitle(),
         event.getDateStart(),
+        event.getHourStart(),
         event.getDateEnd(),
+        event.getHourEnd(),
         refName(event.getEventStatus()),
         refName(event.getEventType()),
         refName(event.getModality()),
@@ -147,7 +155,9 @@ public class EventMapper {
         event.getId(),
         event.getTitle(),
         event.getDateStart(),
+        event.getHourStart(),
         event.getDateEnd(),
+        event.getHourEnd(),
         refName(event.getEventStatus()),
         registrationOpen,
         presenceOpen);

@@ -1,6 +1,5 @@
 package com.project.muttley.services.event;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -140,8 +139,9 @@ public class EventFormService {
     if (!isInProgress(event)) {
       throw new EventRegistrationException("As inscrições não estão abertas para este evento");
     }
-    if (!LocalDate.now().isBefore(event.getDateStart())) {
-      throw new EventRegistrationException("A inscrição só é permitida antes do início do evento");
+    if (!LocalDateTime.now().isBefore(getEventStartDateTime(event))) {
+      throw new EventRegistrationException(
+          "A inscrição só é permitida antes do início do evento");
     }
   }
 
@@ -153,27 +153,41 @@ public class EventFormService {
       throw new EventRegistrationException("A confirmação de presença não está aberta para este evento");
     }
 
-    LocalDate today = LocalDate.now();
-    LocalDate endDate = event.getDateEnd() != null ? event.getDateEnd() : event.getDateStart();
-    if (today.isBefore(event.getDateStart()) || today.isAfter(endDate)) {
+    LocalDateTime now = LocalDateTime.now();
+
+    if (now.isBefore(getEventStartDateTime(event))
+        || now.isAfter(getEventEndDateTime(event))) {
+
       throw new EventRegistrationException(
           "A confirmação de presença só é permitida durante o período do evento");
     }
   }
 
+  private LocalDateTime getEventStartDateTime(Event event) {
+    return LocalDateTime.of(
+        event.getDateStart(),
+        event.getHourStart());
+  }
+
+  private LocalDateTime getEventEndDateTime(Event event) {
+    return LocalDateTime.of(
+        event.getDateEnd() != null ? event.getDateEnd() : event.getDateStart(),
+        event.getHourEnd() != null ? event.getHourEnd() : event.getHourStart());
+  }
+
   private boolean isRegistrationOpen(Event event) {
     return isInProgress(event)
         && !isFinalized(event)
-        && LocalDate.now().isBefore(event.getDateStart());
+        && LocalDateTime.now().isBefore(getEventStartDateTime(event));
   }
 
   private boolean isPresenceOpen(Event event) {
-    LocalDate today = LocalDate.now();
-    LocalDate endDate = event.getDateEnd() != null ? event.getDateEnd() : event.getDateStart();
+    LocalDateTime now = LocalDateTime.now();
+
     return isInProgress(event)
         && !isFinalized(event)
-        && !today.isBefore(event.getDateStart())
-        && !today.isAfter(endDate);
+        && !now.isBefore(getEventStartDateTime(event))
+        && !now.isAfter(getEventEndDateTime(event));
   }
 
   private boolean isFinalized(Event event) {

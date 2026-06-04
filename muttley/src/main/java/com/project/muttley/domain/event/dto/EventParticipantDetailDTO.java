@@ -1,6 +1,7 @@
 package com.project.muttley.domain.event.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import com.project.muttley.domain.event.eventmodality.EventModality;
@@ -11,7 +12,9 @@ public record EventParticipantDetailDTO(
     String title,
     EventModality eventModality,
     LocalDate dateStart,
+    LocalTime hourStart,
     String dateEnd,
+    LocalTime hourEnd,
     EventStatus status) {
 
 }

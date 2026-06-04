@@ -1,6 +1,7 @@
 package com.project.muttley.domain.event;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +41,11 @@ public class Event extends AuditableEntity {
 
   private LocalDate dateStart;
 
+  private LocalTime hourStart;
+
   private LocalDate dateEnd;
+
+  private LocalTime hourEnd;
 
   private Integer workLoad;
 

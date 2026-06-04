@@ -1,6 +1,7 @@
 package com.project.muttley.domain.event.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +14,9 @@ import jakarta.validation.constraints.NotNull;
 public record EventRequestDTO(
     @NotBlank(message = "Título é obrigatório") String title,
     @NotNull(message = "Data inicial é obrigatória") LocalDate startDate,
+    @NotNull(message = "Hora inicial é obrigatória") LocalTime startHour,
     LocalDate endDate,
+    LocalTime endHour,
     Integer workload,
     Integer points,
     @NotBlank(message = "Tipo do evento é obrigatório") String typeId,

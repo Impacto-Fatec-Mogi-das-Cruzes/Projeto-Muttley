@@ -136,9 +136,11 @@ public class EventService {
         e.getTitle(),
         e.getModality(),
         e.getDateStart(),
+        e.getHourStart(),
         e.getDateEnd() != null
             ? e.getDateEnd().toString()
             : "Não definido",
+        e.getHourEnd(),
         e.getEventStatus()));
   }
 
@@ -385,6 +387,14 @@ public class EventService {
     if (request.endDate() != null && request.endDate().isBefore(request.startDate())) {
       throw new IllegalArgumentException("A data final não pode ser anterior à data inicial");
     }
+    if (request.endDate() != null
+        && request.endDate().equals(request.startDate())
+        && request.endHour() != null
+        && request.endHour().isBefore(request.startHour())) {
+
+      throw new IllegalArgumentException(
+          "A hora final não pode ser anterior à hora inicial");
+    }
     if (EventKeywords.parse(request.keywords()).isEmpty()) {
       throw new IllegalArgumentException("Informe pelo menos uma competência nas keywords");
     }
@@ -397,6 +407,10 @@ public class EventService {
   private void ajustarDataFim(Event event) {
     if (event.getDateEnd() == null) {
       event.setDateEnd(event.getDateStart());
+    }
+
+    if (event.getHourEnd() == null) {
+      event.setHourEnd(event.getHourStart());
     }
   }
 
