@@ -2,26 +2,28 @@ version: '3.9'
 
 services:
 
-  postgres:
-    image: postgres:16
-    container_name: postgres_db
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
 
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "${MYSQL_PORT}:3306"
 
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
   app:
     image: maven:3.9.6-eclipse-temurin-17
@@ -39,15 +41,16 @@ services:
       - "8080:8080"
 
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
       pdfservice:
         condition: service_healthy
 
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: America/Sao_Paulo
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DB}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
 
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
@@ -68,6 +71,7 @@ services:
       SPRING_MAIL_FROM: ${MAIL_FROM}
       MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH}
       MAIL_TLS: ${MAIL_TLS}
+
   pdfservice:
     image: node:20-alpine
     container_name: pdfservice
@@ -87,6 +91,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
 volumes:
-  postgres_data:
+  mysql_data:
   maven_cache:

@@ -3,13 +3,19 @@ package com.project.muttley.domain.event.eventparticipant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
+
 import com.project.muttley.domain.base.AuditableEntity;
 import com.project.muttley.domain.event.Event;
 import com.project.muttley.domain.participant.Participant;
 import com.project.muttley.domain.participant.participanttype.ParticipantType;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -31,7 +37,10 @@ import lombok.Setter;
 public class EventParticipant extends AuditableEntity {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @UuidGenerator
+  @JdbcTypeCode(SqlTypes.VARCHAR)
+  @Column(columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
   private UUID id;
 
   @ManyToOne

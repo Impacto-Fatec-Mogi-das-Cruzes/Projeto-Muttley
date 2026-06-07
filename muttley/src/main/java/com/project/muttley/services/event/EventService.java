@@ -1,5 +1,6 @@
 package com.project.muttley.services.event;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -213,6 +214,11 @@ public class EventService {
     Event event = findEventById(id);
     EventStatus finalizedStatus = findEventStatus(EventMapper.STATUS_FINALIZED);
 
+    LocalDateTime endDateTime = LocalDateTime.of(event.getDateEnd(), event.getHourEnd());
+    if (LocalDateTime.now().isBefore(endDateTime)) {
+      throw new IllegalStateException("O evento só pode ser finalizado após a data e hora de encerramento");
+    }
+
     if (event.getEventStatus() != null
         && EventMapper.STATUS_FINALIZED.equalsIgnoreCase(event.getEventStatus().getName())) {
       throw new IllegalStateException("O evento já está finalizado");
@@ -384,6 +390,19 @@ public class EventService {
     if (request.startDate() == null) {
       throw new IllegalArgumentException("A data inicial é obrigatória");
     }
+
+    if (request.startDate() == null) {
+      throw new IllegalArgumentException("A data final é obrigatória");
+    }
+
+    if (request.startHour() == null) {
+      throw new IllegalArgumentException("A hora inicial é obrigatória");
+    }
+
+    if (request.endHour() == null) {
+      throw new IllegalArgumentException("A hora final é obrigatória");
+    }
+
     if (request.endDate() != null && request.endDate().isBefore(request.startDate())) {
       throw new IllegalArgumentException("A data final não pode ser anterior à data inicial");
     }
