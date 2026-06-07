@@ -95,7 +95,7 @@ public class RewardService {
       emailService.sendEmail(
           emailFrom,
           participant.getEmail(),
-          "Parabéns! Seu certificado especial do evento " + event.getTitle() + "está disponível",
+          "Parabéns! Seu certificado especial do evento " + event.getTitle() + " está disponível",
           emailService.buildEmailHtml(event.getTitle(), competencies),
           pdf);
     }
