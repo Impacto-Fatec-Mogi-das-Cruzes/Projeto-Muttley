@@ -267,7 +267,7 @@ public class EventService {
       emailService.sendEmail(
           emailFrom,
           participant.getEmail(),
-          "Seu certificado do evento " + event.getTitle() + "está disponível",
+          "Seu certificado do evento " + event.getTitle() + " está disponível",
           emailService.buildEmailHtmlParticipantion(event.getTitle(), competencies),
           pdf);
     }
