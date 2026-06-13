@@ -72,12 +72,12 @@ Inicie o docker compose do projeto (**DEV** ou **PROD**):
 
 **DEV**
 ``` terminal
-  docker compose -f docker-compose.dev.yml
+  docker compose -f docker-compose.dev.yml up -d
 ```
 
 **PROD**
 ``` terminal
-  docker compose -f docker-compose.yml
+  docker compose -f docker-compose.yml up -d
 ```
 
  Acesse o frontend:
