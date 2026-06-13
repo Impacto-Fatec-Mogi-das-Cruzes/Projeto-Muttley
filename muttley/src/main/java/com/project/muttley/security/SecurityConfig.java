@@ -1,5 +1,6 @@
 package com.project.muttley.security;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +33,16 @@ public class SecurityConfig {
   @Autowired
   private JwtAuthFilter jwtAuthFilter;
 
-  @Value("${app.public-base-url}")
-  private String frontendUrl;
+  @Value("${app.cors.allowed-origins}")
+  private String allowedOrigins;
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(List.of(frontendUrl));
+    config.setAllowedOrigins(Arrays.stream(allowedOrigins.split(","))
+        .map(String::trim)
+        .filter(origin -> !origin.isEmpty())
+        .toList());
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
     config.setAllowedHeaders(List.of("*"));
     config.setAllowCredentials(false);
