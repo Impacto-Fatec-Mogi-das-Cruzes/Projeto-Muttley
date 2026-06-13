@@ -97,5 +97,18 @@ Inicie o docker compose do projeto (**DEV** ou **PROD**):
  Acesse o frontend:
 
  ```url
-  https://muttley.netlify.app
+  http://localhost:5173
+```
+---
+## Login
+Login Inicial
+
+Acesso (Email)
+```
+  admin@fatec.sp.gov.br
+```
+
+Senha Temporária
+```
+  admin123
 ```
