@@ -105,10 +105,10 @@ Login Inicial
 
 Acesso (Email)
 ```
-  admin@fatec.sp.gov.br
+admin@fatec.sp.gov.br
 ```
 
 Senha Temporária
 ```
-  admin123
+admin123
 ```
